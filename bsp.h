@@ -42,9 +42,11 @@
 # define __END_C_DECLS /* empty */
 #endif    
 
-#define BSP_TICKS_PER_SEC    1000U
+#define BSP_TICKS_PER_SEC    100U
 #define SYSTICK_INTERRUPT_VECTOR_NUMBER 15u /* Cortex-M3 hard vector DO NOT CHANGE FROM 15 */
     
+extern QActive *the_Ticker0; /* "Ticker" active object for tick rate 0 */
+
 __BEGIN_C_DECLS
 
 #define BSP_LedOff(); 		pinLED_Write(0);

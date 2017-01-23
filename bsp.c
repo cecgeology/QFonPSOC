@@ -66,6 +66,15 @@ enum KernelUnawareISRs { /* see NOTE00 */
 /* "kernel-unaware" interrupts can't overlap "kernel-aware" interrupts */
 Q_ASSERT_COMPILE(MAX_KERNEL_UNAWARE_CMSIS_PRI <= QF_AWARE_ISR_CMSIS_PRI);
 
+
+
+
+
+
+
+
+
+
 enum KernelAwareISRs {
     SYSTICK_PRIO = QF_AWARE_ISR_CMSIS_PRI, /* see NOTE00 */
     ISRSWITCH1_PRIO,
@@ -126,9 +135,13 @@ CY_ISR(SysTick_Handler){
     }
 #endif
 
-    QF_TICK_X(0U, &l_SysTick_Handler); /* process time events for rate 0 */
+   // QF_TICK_X(0U, &l_SysTick_Handler); /* process time events for rate 0 */
     //assiging a 0 to the rate here arms a one-shot event
 //    QF_PUBLISH(&tickEvt, &l_SysTick_Handler); /* publish to all subscribers */
+
+//the new way (from 5.8.1) to deal with the QF Ticks is to post to an active object  
+QACTIVE_POST(the_Ticker0, 0, 0); /* post a don't-care event to Ticker0 */
+
 }
 
 /* put in all other interrupt handlers here */

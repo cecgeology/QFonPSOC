@@ -21,6 +21,11 @@
 #define Q_SPY //enable this for software tracing
 Q_DEFINE_THIS_FILE
 
+static QTicker l_ticker0; /* ticker active object for tick rate 0 */
+QActive *the_Ticker0 = &l_ticker0;
+    
+
+
 int main(void)
 {
     //CyGlobalIntEnable; /* Enable global interrupts. */
@@ -31,6 +36,11 @@ int main(void)
     static QF_MPOOL_EL(TableEvt) smlPoolSto[2*N_PHILO]; /* small pool */
     uint8_t n;
 
+    
+                /* explicitly invoke the active objects' ctors... */
+    QTicker_ctor(&l_ticker0, 0U); /* active object for tick rate 0 */
+    
+    
     Philo_ctor(); /* instantiate all Philosopher active objects */
     Table_ctor(); /* instantiate the Table active object */
 
@@ -53,9 +63,15 @@ int main(void)
     QF_poolInit(smlPoolSto, sizeof(smlPoolSto), sizeof(smlPoolSto[0]));
 
     /* start the active objects... */
+            QACTIVE_START(the_Ticker0,      //this is the tick tick processing event
+                  1U,                /* QP priority */
+                  0, 0, 0, 0, 0);    /* no queue, no stack , no init. event */
+    
+
+    
     for (n = 0U; n < N_PHILO; ++n) {
         QACTIVE_START(AO_Philo[n],           /* AO to start */
-                      (uint_fast8_t)(n + 1), /* QP priority of the AO */
+                      (uint_fast8_t)(n + 2), /* QP priority of the AO */
                       philoQueueSto[n],      /* event queue storage */
                       Q_DIM(philoQueueSto[n]), /* queue length [events] */
                       (void *)0,             /* stack storage (not used) */
@@ -63,7 +79,7 @@ int main(void)
                      (QEvt *)0);             /* initialization event */
     }
     QACTIVE_START(AO_Table,                  /* AO to start */
-                  (uint_fast8_t)(N_PHILO + 1), /* QP priority of the AO */
+                  (uint_fast8_t)(N_PHILO + 2), /* QP priority of the AO */
                   tableQueueSto,             /* event queue storage */
                   Q_DIM(tableQueueSto),      /* queue length [events] */
                   (void *)0,                 /* stack storage (not used) */
